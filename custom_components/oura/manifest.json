@@ -6,7 +6,7 @@
     "dependencies": [],
     "documentation": "https://github.com/0xvisualiris/ouraring-hass",
     "iot_class": "cloud_polling",
-    "icon": "https://raw.githubusercontent.com/0xvisualiris/ouraring-hass/main/ouraring_icon.png",
+    "icon": "/local/community/ouraring-hass/ouraring_icon.png",
     "requirements": ["aiohttp"],
     "version": "0.0.1"
 }
