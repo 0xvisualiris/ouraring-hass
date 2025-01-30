@@ -1,0 +1,11 @@
+{
+    "domain": "oura",
+    "name": "Oura Ring",
+    "codeowners": ["@0xvisualiris"],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/0xvisualiris/ouraring-hass",
+    "iot_class": "cloud_polling",
+    "requirements": ["aiohttp"],
+    "version": "1.0.5"
+}
