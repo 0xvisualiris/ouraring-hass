@@ -24,4 +24,4 @@ This integration allows you to monitor your Oura Ring data in Home Assistant.
 
 ## Support
 
-Having issues? Open an issue on [GitHub](https://github.com/yourusername/ha-oura/issues)
+Having issues? Open an issue on [GitHub](https://github.com/0xvisualiris/ouraring-hass/issues)
