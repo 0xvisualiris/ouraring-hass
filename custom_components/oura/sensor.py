@@ -9,9 +9,9 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorEntityDescription,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import (
@@ -47,6 +47,43 @@ SENSORS: tuple[OuraRingSensorEntityDescription, ...] = (
         value_fn=lambda data: data.get("activity_score"),
         icon="mdi:run",
     ),
+    OuraRingSensorEntityDescription(
+        key="cardiovascular_age",
+        name="Cardiovascular Age",
+        value_fn=lambda data: data.get("cardiovascular_age"),
+        icon="mdi:heart-cog",
+    ),
+    OuraRingSensorEntityDescription(
+        key="resilience",
+        name="Resilience",
+        value_fn=lambda data: data.get("resilience"),
+        icon="mdi:shield-heart",
+    ),
+    OuraRingSensorEntityDescription(
+        key="spo2",
+        name="SpO2",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda data: data.get("spo2"),
+        icon="mdi:oxygen",
+    ),
+    OuraRingSensorEntityDescription(
+        key="stress",
+        name="Stress Level",
+        value_fn=lambda data: data.get("stress"),
+        icon="mdi:emoticon-sad",
+    ),
+    OuraRingSensorEntityDescription(
+        key="heartrate",
+        name="Heart Rate",
+        value_fn=lambda data: data.get("heartrate"),
+        icon="mdi:heart-pulse",
+    ),
+    OuraRingSensorEntityDescription(
+        key="rest_mode",
+        name="Rest Mode",
+        value_fn=lambda data: data.get("rest_mode"),
+        icon="mdi:bed",
+    ),
 )
 
 async def async_setup_entry(
@@ -54,7 +91,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    '''Set up the Oura Ring sensors.'''
+    '''Set up additional Oura Ring sensors.'''
     coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     async_add_entities(
