@@ -1,0 +1,20 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Oura Ring",
+                "description": "Geben Sie Ihr Oura Ring Personal Access Token ein",
+                "data": {
+                    "access_token": "Zugriffstoken"
+                }
+            }
+        },
+        "error": {
+            "invalid_auth": "Ungültige Authentifizierung",
+            "unknown": "Unerwarteter Fehler"
+        },
+        "abort": {
+            "already_configured": "Das Gerät ist bereits konfiguriert"
+        }
+    }
+}
