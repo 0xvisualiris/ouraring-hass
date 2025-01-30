@@ -65,6 +65,12 @@ class OuraDataUpdateCoordinator(DataUpdateCoordinator):
                 "activity_score": "usercollection/daily_activity",
                 "readiness_score": "usercollection/daily_readiness",
                 "sleep_score": "usercollection/daily_sleep",
+                "cardiovascular_age": "usercollection/daily_cardiovascular_age",
+                "resilience": "usercollection/daily_resilience",
+                "spo2": "usercollection/daily_spo2",
+                "stress": "usercollection/daily_stress",
+                "heartrate": "usercollection/heartrate",
+                "rest_mode": "usercollection/rest_mode_period",
             }
             
             for key, endpoint in endpoints.items():
