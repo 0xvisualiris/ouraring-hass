@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import API_BASE_URL, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import API_BASE_URL, DEFAULT_SCAN_INTERVAL, DOMAIN, CONF_SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR]
@@ -26,12 +26,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass,
         session,
         entry.data[CONF_ACCESS_TOKEN],
-        entry.entry_id
+        entry.entry_id,
+        entry.data.get(CONF_SENSORS, []),  # Pass selected sensors
     )
+    
     await coordinator.async_config_entry_first_refresh()
     hass.data[DOMAIN][entry.entry_id] = coordinator
     
-    hass.async_create_task(hass.config_entries.async_forward_entry_setups(entry, PLATFORMS))
+    # Only forward entry setup for selected sensors
+    hass.async_create_task(hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR]))
+
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -44,7 +48,7 @@ class OuraDataUpdateCoordinator(DataUpdateCoordinator):
     '''Class to manage fetching data from Oura Ring API.'''
 
     def __init__(
-        self, hass: HomeAssistant, session: ClientSession, access_token: str, entry_id: str
+        self, hass: HomeAssistant, session: ClientSession, access_token: str, entry_id: str, selected_sensors: list[str]
     ) -> None:
         '''Initialize the coordinator.'''
         super().__init__(
@@ -56,9 +60,10 @@ class OuraDataUpdateCoordinator(DataUpdateCoordinator):
         self._session = session
         self._access_token = access_token
         self._headers = {"Authorization": f"Bearer {access_token}"}
+        self.selected_sensors = selected_sensors  # Store the selected sensors
 
     async def _async_update_data(self) -> dict:
-        '''Fetch data from Oura API.'''
+        '''Fetch data from Oura API, only for selected sensors.'''
         try:
             data = {}
             endpoints = {
@@ -74,6 +79,9 @@ class OuraDataUpdateCoordinator(DataUpdateCoordinator):
             }
             
             for key, endpoint in endpoints.items():
+                if key not in self.selected_sensors:
+                    continue  # Skip sensors that were not selected
+
                 url = f"{API_BASE_URL}/{endpoint}"
                 _LOGGER.debug("Fetching Oura data from: %s", url)
                 
