@@ -16,9 +16,31 @@ from .const import DOMAIN, API_BASE_URL
 
 _LOGGER = logging.getLogger(__name__)
 
+CONF_SENSORS = "sensors"
+
+SENSOR_OPTIONS = {
+    "sleep": "Sleep",
+    "readiness": "Readiness",
+    "activity": "Activity",
+    "cardiovascular_age": "Cardiovascular Age",
+    "resilience": "Resilience",
+    "spo2": "SpO2",
+    "stress": "Stress",
+    "heartrate": "Heart Rate",
+    "rest_mode": "Rest Mode",
+}
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_ACCESS_TOKEN): str,
+    }
+)
+
+STEP_SENSOR_SELECTION_SCHEMA = vol.Schema(
+    {
+        vol.Optional(CONF_SENSORS, default=list(SENSOR_OPTIONS.keys())): vol.All(
+            list, [vol.In(SENSOR_OPTIONS.keys())]
+        ),
     }
 )
 
@@ -41,17 +63,30 @@ class OuraFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
             if valid:
-                return self.async_create_entry(
-                    title="Oura Ring",
-                    data=user_input,
-                )
-            
+                self.access_token = user_input[CONF_ACCESS_TOKEN]
+                return await self.async_step_sensors()
+
             errors["base"] = "auth"
 
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_USER_DATA_SCHEMA,
             errors=errors,
+        )
+
+    async def async_step_sensors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Allow users to select which sensors to enable."""
+        if user_input is not None:
+            return self.async_create_entry(
+                title="Oura Ring",
+                data={CONF_ACCESS_TOKEN: self.access_token, CONF_SENSORS: user_input[CONF_SENSORS]},
+            )
+
+        return self.async_show_form(
+            step_id="sensors",
+            data_schema=STEP_SENSOR_SELECTION_SCHEMA,
         )
 
     async def _test_credentials(self, session: ClientSession, access_token: str) -> bool:
