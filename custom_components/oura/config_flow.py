@@ -38,9 +38,8 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 STEP_SENSOR_SELECTION_SCHEMA = vol.Schema(
     {
-        vol.Optional(CONF_SENSORS, default=list(SENSOR_OPTIONS.keys())): vol.All(
-            list, [vol.In(SENSOR_OPTIONS.keys())]
-        ),
+        vol.Optional(sensor, default=True): bool
+        for sensor in SENSOR_OPTIONS.keys()
     }
 )
 
@@ -79,9 +78,12 @@ class OuraFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Allow users to select which sensors to enable."""
         if user_input is not None:
+            selected_sensors = [
+                sensor for sensor, enabled in user_input.items() if enabled
+            ]
             return self.async_create_entry(
                 title="Oura Ring",
-                data={CONF_ACCESS_TOKEN: self.access_token, CONF_SENSORS: user_input[CONF_SENSORS]},
+                data={CONF_ACCESS_TOKEN: self.access_token, CONF_SENSORS: selected_sensors},
             )
 
         return self.async_show_form(
