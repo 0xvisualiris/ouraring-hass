@@ -12,23 +12,9 @@ from homeassistant.const import CONF_ACCESS_TOKEN
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, API_BASE_URL
+from .const import DOMAIN, API_BASE_URL, CONF_SENSORS, SENSOR_OPTIONS
 
 _LOGGER = logging.getLogger(__name__)
-
-CONF_SENSORS = "sensors"
-
-SENSOR_OPTIONS = {
-    "sleep": "Sleep",
-    "readiness": "Readiness",
-    "activity": "Activity",
-    "cardiovascular_age": "Cardiovascular Age",
-    "resilience": "Resilience",
-    "spo2": "SpO2",
-    "stress": "Stress",
-    "heartrate": "Heart Rate",
-    "rest_mode": "Rest Mode",
-}
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -38,7 +24,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 STEP_SENSOR_SELECTION_SCHEMA = vol.Schema(
     {
-        vol.Optional(sensor, default=True): bool
+        vol.Optional(sensor, default=False): bool  # Default is False, so only checked sensors get stored
         for sensor in SENSOR_OPTIONS.keys()
     }
 )
@@ -78,9 +64,8 @@ class OuraFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Allow users to select which sensors to enable."""
         if user_input is not None:
-            selected_sensors = [
-                sensor for sensor, enabled in user_input.items() if enabled
-            ]
+            selected_sensors = [sensor for sensor, enabled in user_input.items() if enabled]
+
             return self.async_create_entry(
                 title="Oura Ring",
                 data={CONF_ACCESS_TOKEN: self.access_token, CONF_SENSORS: selected_sensors},
