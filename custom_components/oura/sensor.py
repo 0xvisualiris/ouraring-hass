@@ -18,86 +18,92 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
-from .const import DOMAIN
+from .const import DOMAIN, CONF_SENSORS
 
 @dataclass
 class OuraRingSensorEntityDescription(SensorEntityDescription):
     '''Class describing Oura Ring sensor entities.'''
     value_fn: Callable[[dict[str, Any]], StateType] | None = None
 
-SENSORS: tuple[OuraRingSensorEntityDescription, ...] = (
-    OuraRingSensorEntityDescription(
+SENSORS: dict[str, OuraRingSensorEntityDescription] = {
+    "sleep_score": OuraRingSensorEntityDescription(
         key="sleep_score",
         name="Sleep Score",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda data: data.get("sleep_score"),
         icon="mdi:sleep",
     ),
-    OuraRingSensorEntityDescription(
+    "readiness_score": OuraRingSensorEntityDescription(
         key="readiness_score",
         name="Readiness Score",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda data: data.get("readiness_score"),
         icon="mdi:heart-pulse",
     ),
-    OuraRingSensorEntityDescription(
+    "activity_score": OuraRingSensorEntityDescription(
         key="activity_score",
         name="Activity Score",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda data: data.get("activity_score"),
         icon="mdi:run",
     ),
-    OuraRingSensorEntityDescription(
+    "cardiovascular_age": OuraRingSensorEntityDescription(
         key="cardiovascular_age",
         name="Cardiovascular Age",
         value_fn=lambda data: data.get("cardiovascular_age"),
         icon="mdi:heart-cog",
     ),
-    OuraRingSensorEntityDescription(
+    "resilience": OuraRingSensorEntityDescription(
         key="resilience",
         name="Resilience",
         value_fn=lambda data: data.get("resilience"),
         icon="mdi:shield-heart",
     ),
-    OuraRingSensorEntityDescription(
+    "spo2": OuraRingSensorEntityDescription(
         key="spo2",
         name="SpO2",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=lambda data: data.get("spo2"),
         icon="mdi:oxygen",
     ),
-    OuraRingSensorEntityDescription(
+    "stress": OuraRingSensorEntityDescription(
         key="stress",
         name="Stress Level",
         value_fn=lambda data: data.get("stress"),
         icon="mdi:emoticon-sad",
     ),
-    OuraRingSensorEntityDescription(
+    "heartrate": OuraRingSensorEntityDescription(
         key="heartrate",
         name="Heart Rate",
         value_fn=lambda data: data.get("heartrate"),
         icon="mdi:heart-pulse",
     ),
-    OuraRingSensorEntityDescription(
+    "rest_mode": OuraRingSensorEntityDescription(
         key="rest_mode",
         name="Rest Mode",
         value_fn=lambda data: data.get("rest_mode"),
         icon="mdi:bed",
     ),
-)
+}
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    '''Set up additional Oura Ring sensors.'''
+    '''Set up Oura Ring sensors based on user selection.'''
     coordinator: DataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    
+    # Get selected sensors from config entry
+    selected_sensors = entry.data.get(CONF_SENSORS, [])
 
-    async_add_entities(
-        OuraRingSensor(coordinator, description, entry)
-        for description in SENSORS
-    )
+    # Filter the sensors based on the selection
+    sensors_to_add = [
+        OuraRingSensor(coordinator, SENSORS[sensor], entry)
+        for sensor in selected_sensors if sensor in SENSORS
+    ]
+
+    async_add_entities(sensors_to_add, True)
 
 class OuraRingSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
     '''Implementation of an Oura Ring sensor.'''
