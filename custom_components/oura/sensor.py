@@ -18,7 +18,7 @@ from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
-from .const import DOMAIN, CONF_SENSORS
+from .const import DOMAIN, CONF_SENSORS, SENSOR_OPTIONS
 
 @dataclass
 class OuraRingSensorEntityDescription(SensorEntityDescription):
